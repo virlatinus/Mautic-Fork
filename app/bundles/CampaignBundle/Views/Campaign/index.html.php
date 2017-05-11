@@ -11,6 +11,20 @@
 $view->extend('MauticCoreBundle:Default:content.html.php');
 $view['slots']->set('headerTitle', $view['translator']->trans('mautic.campaign.campaigns'));
 
+$pageButtons = [];
+if ($permissions['campaign:campaigns:create']) {
+    $pageButtons[] = [
+        'attr' => [
+            'data-toggle' => 'ajaxmodal',
+            'data-target' => '#MauticSharedModal',
+            'data-header' => $view['translator']->trans('mautic.campaign.import_caption'),
+            'href'        => $view['router']->path('mautic_campaign_action', ['objectAction' => 'import']),
+        ],
+        'iconClass' => 'fa fa-upload',
+        'btnText'   => 'mautic.lead.lead.import',
+    ];
+}
+
 $view['slots']->set(
     'actions',
     $view->render(
@@ -19,7 +33,8 @@ $view['slots']->set(
             'templateButtons' => [
                 'new' => $permissions['campaign:campaigns:create'],
             ],
-            'routeBase' => 'campaign',
+            'customButtons' => $pageButtons,
+            'routeBase'     => 'campaign',
         ]
     )
 );

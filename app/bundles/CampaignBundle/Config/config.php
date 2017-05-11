@@ -167,6 +167,10 @@ return [
             ],
         ],
         'forms' => [
+            'mautic.form.type.campaign_import' => [
+                'class' => 'Mautic\CampaignBundle\Form\Type\ImportType',
+                'alias' => 'campaign_import',
+            ],
             'mautic.campaign.type.form' => [
                 'class'     => 'Mautic\CampaignBundle\Form\Type\CampaignType',
                 'arguments' => 'mautic.factory',

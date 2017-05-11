@@ -71,6 +71,82 @@ class CampaignController extends AbstractStandardFormController
     protected $sessionId;
 
     /**
+     * @return JsonResponse
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function importAction()
+    {
+        $json = '';
+        if ('POST' === $this->request->getMethod()) {
+            $data = $this->request->request->get('campaign_import', [], true);
+            $json = $data['json'];
+        }
+
+        if (!$this->get('mautic.security')->isGranted('campaign:campaigns:create')) {
+            $this->addFlash(
+                $this->translator->trans('mautic.plugin.fullcontact.forbidden'),
+                [],
+                'error'
+            );
+
+            return new JsonResponse(
+                [
+                    'closeModal' => true,
+                    'flashes'    => $this->getFlashContent(),
+                ]
+            );
+        }
+
+        if ('GET' === $this->request->getMethod()) {
+            $route = $this->generateUrl(
+                'mautic_campaign_action',
+                [
+                    'objectAction' => 'import',
+                ]
+            );
+
+            return $this->delegateView(
+                [
+                    'viewParameters' => [
+                        'form' => $this->createForm('campaign_import', [], ['action' => $route])->createView(),
+                    ],
+                    'contentTemplate' => 'MauticCampaignBundle:Campaign:import.html.php',
+                    'passthroughVars' => [
+                        'activeLink'    => '#mautic_campaign_index',
+                        'mauticContent' => 'campaign',
+                        'route'         => $route,
+                    ],
+                ]
+            );
+        } else {
+            if ('POST' === $this->request->getMethod()) {
+                try {
+                    // $this->get('mautic.plugin.fullcontact.lookup_helper')->lookupContact($lead, array_key_exists('notify', $data));
+                    $this->addFlash(
+                        'mautic.lead.batch_leads_affected',
+                        [
+                            'pluralCount' => 1,
+                            '%count%'     => 1,
+                        ]
+                    );
+                } catch (\Exception $ex) {
+                    $this->addFlash($ex->getMessage(), [], 'error');
+                }
+
+                return new JsonResponse(
+                    [
+                        'closeModal' => true,
+                        'flashes'    => $this->getFlashContent(),
+                    ]
+                );
+            }
+        }
+
+        return new Response('Bad Request', 400);
+    }
+
+    /**
      * Deletes a group of entities.
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse
@@ -650,10 +726,10 @@ class CampaignController extends AbstractStandardFormController
                 ];
 
                 foreach ($events as $event) {
-                    $event['logCount'] =
-                    $event['percent'] =
+                    $event['logCount']   =
+                    $event['percent']    =
                     $event['yesPercent'] =
-                    $event['noPercent'] = 0;
+                    $event['noPercent']  = 0;
 
                     if (isset($campaignLogCounts[$event['id']])) {
                         $event['logCount'] = array_sum($campaignLogCounts[$event['id']]);
