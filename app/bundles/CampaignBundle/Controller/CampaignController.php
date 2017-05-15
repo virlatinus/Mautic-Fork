@@ -111,7 +111,83 @@ class CampaignController extends AbstractStandardFormController
                     'viewParameters' => [
                         'form' => $this->createForm('campaign_import', [], ['action' => $route])->createView(),
                     ],
-                    'contentTemplate' => 'MauticCampaignBundle:Campaign:import.html.php',
+                    'contentTemplate' => 'MauticCampaignBundle:Campaign:import_export.html.php',
+                    'passthroughVars' => [
+                        'activeLink'    => '#mautic_campaign_index',
+                        'mauticContent' => 'campaign',
+                        'route'         => $route,
+                    ],
+                ]
+            );
+        } else {
+            if ('POST' === $this->request->getMethod()) {
+                try {
+                    // $this->get('mautic.plugin.fullcontact.lookup_helper')->lookupContact($lead, array_key_exists('notify', $data));
+                    $this->addFlash(
+                        'mautic.lead.batch_leads_affected',
+                        [
+                            'pluralCount' => 1,
+                            '%count%'     => 1,
+                        ]
+                    );
+                } catch (\Exception $ex) {
+                    $this->addFlash($ex->getMessage(), [], 'error');
+                }
+
+                return new JsonResponse(
+                    [
+                        'closeModal' => true,
+                        'flashes'    => $this->getFlashContent(),
+                    ]
+                );
+            }
+        }
+
+        return new Response('Bad Request', 400);
+    }
+
+    /**
+     * @return JsonResponse
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function exportAction()
+    {
+        $json = '';
+        if ('POST' === $this->request->getMethod()) {
+            $data = $this->request->request->get('campaign_export', [], true);
+            $json = $data['json'];
+        }
+
+        if (!$this->get('mautic.security')->isGranted('campaign:campaigns:create')) {
+            $this->addFlash(
+                $this->translator->trans('mautic.plugin.fullcontact.forbidden'),
+                [],
+                'error'
+            );
+
+            return new JsonResponse(
+                [
+                    'closeModal' => true,
+                    'flashes'    => $this->getFlashContent(),
+                ]
+            );
+        }
+
+        if ('GET' === $this->request->getMethod()) {
+            $route = $this->generateUrl(
+                'mautic_campaign_action',
+                [
+                    'objectAction' => 'import',
+                ]
+            );
+
+            return $this->delegateView(
+                [
+                    'viewParameters' => [
+                        'form' => $this->createForm('campaign_import', [], ['action' => $route])->createView(),
+                    ],
+                    'contentTemplate' => 'MauticCampaignBundle:Campaign:import_export.html.php',
                     'passthroughVars' => [
                         'activeLink'    => '#mautic_campaign_index',
                         'mauticContent' => 'campaign',

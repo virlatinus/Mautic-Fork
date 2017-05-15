@@ -120,6 +120,12 @@ return [
 
     'services' => [
         'events' => [
+            'mautic.campaign.button.subscriber' => [
+                'class'     => 'Mautic\CampaignBundle\EventListener\ButtonSubscriber',
+                'arguments' => [
+                    'mautic.helper.integration',
+                ],
+            ],
             'mautic.campaign.subscriber' => [
                 'class'     => 'Mautic\CampaignBundle\EventListener\CampaignSubscriber',
                 'arguments' => [
@@ -170,6 +176,10 @@ return [
             'mautic.form.type.campaign_import' => [
                 'class' => 'Mautic\CampaignBundle\Form\Type\ImportType',
                 'alias' => 'campaign_import',
+            ],
+            'mautic.form.type.campaign_export' => [
+                'class' => 'Mautic\CampaignBundle\Form\Type\ExportType',
+                'alias' => 'campaign_export',
             ],
             'mautic.campaign.type.form' => [
                 'class'     => 'Mautic\CampaignBundle\Form\Type\CampaignType',
