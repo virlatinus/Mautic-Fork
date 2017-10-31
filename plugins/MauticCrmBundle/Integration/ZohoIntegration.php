@@ -862,9 +862,12 @@ class ZohoIntegration extends CrmAbstractIntegration
     {
         $config['object'] = 'Leads';
         $mappedData       = parent::populateLeadData($lead, $config);
-        $writer           = (new Writer($config['object']));
-        $row              = $writer->row($lead->getId());
-
+        $writer           = new Writer($config['object']);
+        if ($lead instanceof Lead) {
+            $row = $writer->row($lead->getId());
+        } else {
+            $row = $writer->row($lead['id']);
+        }
         foreach ($mappedData as $name => $value) {
             $row->add($name, $value);
         }
