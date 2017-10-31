@@ -815,8 +815,9 @@ class ZohoIntegration extends CrmAbstractIntegration
                                 ];
                             }
                         }
-
-                        $this->cache->set('leadFields'.$cacheSuffix, $zohoFields[$zohoObject]);
+                        if (empty($settings['ignore_field_cache'])) {
+                            $this->cache->set('leadFields'.$cacheSuffix, $zohoFields[$zohoObject]);
+                        }
                     }
                 }
             }
